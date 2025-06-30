@@ -1,3 +1,4 @@
+import React from "react";
 import Navbar from "./components/Navbar";
 
 import HomePage from "./pages/HomePage";
@@ -16,7 +17,7 @@ import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
-  const { theme } = useThemeStore();
+
 
   console.log({ onlineUsers });
 
@@ -34,7 +35,7 @@ const App = () => {
     );
 
   return (
-    <div data-theme={theme}>
+    <div>
       <Navbar />
 
       <Routes>
