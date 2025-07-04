@@ -19,6 +19,7 @@ const Navbar = () => {
                 <MessageSquare className="w-5 h-5 text-primary" />
               </div>
               <h1 className="text-lg font-bold">Whisprr</h1>
+              <button className="btn btn-primary">Test</button> {/* Test button here */}
             </Link>
           </div>
 
