@@ -57,3 +57,9 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+
+
+/*
+Ln 27:-
+{users.map((user) => ( ... ))} is React JSX syntax that loops over the users array and renders a UI element for each user.
+*/

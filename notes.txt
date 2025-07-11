@@ -10,3 +10,5 @@ The arrow function doesnt accept any parameters
 extract email and password the the requests body and store them under the name email and password
 
 =>zustand is a global state management library
+
+=>the store contains diff kinds of state which is categorised in different files, for example, in the useChatStore, it contains diff kinds of states like the messages, users, getMessages, isMessagesLoading etc
