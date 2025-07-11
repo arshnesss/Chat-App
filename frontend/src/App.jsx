@@ -14,15 +14,19 @@ import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
 
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
   const { theme } = useThemeStore();
+
+  console.log({ onlineUsers});
 
   // Initialize auth and theme
   useEffect(() => {
     checkAuth();
     // Set theme on initial load
     document.documentElement.setAttribute("data-theme", theme);
-  }, [checkAuth, theme]);
+  }, [checkAuth]);
+
+  console.log({ authUser});
 
   if (isCheckingAuth && !authUser) {
     return (
