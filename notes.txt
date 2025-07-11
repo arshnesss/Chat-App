@@ -12,3 +12,7 @@ extract email and password the the requests body and store them under the name e
 =>zustand is a global state management library
 
 =>the store contains diff kinds of state which is categorised in different files, for example, in the useChatStore, it contains diff kinds of states like the messages, users, getMessages, isMessagesLoading etc
+
+=>If we want to get a state in the same store then we use get request
+
+=>In development, every useEffect runs 2 times(because of strict mode)
