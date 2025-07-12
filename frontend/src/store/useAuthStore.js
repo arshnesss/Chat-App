@@ -82,6 +82,33 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  blockUser: async (userId) => {
+  try {
+    const res = await axiosInstance.patch(`/auth/block/${userId}`);
+    const updatedUser = res.data;
+
+    set((state) => ({
+      authUser: {
+        ...state.authUser,
+        blockedUsers: updatedUser.blockedUsers,
+      },
+    }));
+
+    toast.success(
+      updatedUser.blockedUsers.includes(userId)
+        ? "User blocked"
+        : "User unblocked"
+    );
+  } catch (err) {
+    console.error("Failed to block/unblock user:", err);
+    toast.error("Failed to block/unblock user");
+  }
+},
+
+
+
+
+
   connectSocket: () => {
     const { authUser } = get();
     if (!authUser || get().socket?.connected) return;
@@ -93,12 +120,39 @@ export const useAuthStore = create((set, get) => ({
     });
     socket.connect();
 
-    set({ socket: socket }); //set socket state with the socket variable
+    set({ socket: socket });
 
     socket.on("getOnlineUsers", (userIds) => {
-      set({ onlineUsers: userIds }); //updating the array of online users
+      set({ onlineUsers: userIds });
+    });
+
+    // ✅ Add this to listen for real-time block/unblock
+    socket.on("blockStatusChanged", ({ blockedBy, isBlocked }) => {
+      const { authUser } = get();
+      if (!authUser) return;
+
+      if (isBlocked) {
+        toast.error("You have been blocked");
+        set((state) => ({
+          authUser: {
+            ...state.authUser,
+            blockedUsers: [...(state.authUser.blockedUsers || []), blockedBy],
+          },
+        }));
+      } else {
+        toast.success("You have been unblocked");
+        set((state) => ({
+          authUser: {
+            ...state.authUser,
+            blockedUsers: state.authUser.blockedUsers.filter(
+              (id) => id !== blockedBy
+            ),
+          },
+        }));
+      }
     });
   },
+
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();
   },

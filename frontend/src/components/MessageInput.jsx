@@ -56,6 +56,19 @@ const MessageInput = () => {
     });
   };
 
+  // ✅ Check if messaging should be disabled
+  const isBlocked =
+    authUser.blockedUsers?.includes(selectedUser._id) ||
+    selectedUser.blockedUsers?.includes(authUser._id);
+
+  if (isBlocked) {
+    return (
+      <div className="text-center text-sm text-zinc-500 py-4">
+        ❌ You can't send messages to this user.
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 w-full">
       {imagePreview && (

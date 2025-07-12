@@ -56,6 +56,20 @@ export const sendMessage = async (req, res) => {
       image: imageUrl,
     });
 
+    const sender = req.user._id;
+    const receiver = req.params.id;
+
+    const senderUser = await User.findById(sender);
+    const receiverUser = await User.findById(receiver);
+
+    if (
+      senderUser.blockedUsers.includes(receiver) ||
+      receiverUser.blockedUsers.includes(sender)
+    ) {
+      return res.status(403).json({ message: "You cannot message this user." });
+    }
+
+    
     await newMessage.save();
 
     //todo: realtime functionality goes here=>socket.io
