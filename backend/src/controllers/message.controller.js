@@ -92,6 +92,22 @@ export const toggleLikeMessage = async (req, res) => {
 
     await message.save();
 
+    // Emit to receiver if online
+    const receiverSocketId = getReceiverSocketId(
+      message.receiverId.toString() === userId.toString()
+        ? message.senderId
+        : message.receiverId
+    );
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageLiked", message);
+    }
+
+    // Also emit to the sender for consistency
+    const senderSocketId = getReceiverSocketId(userId);
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("messageLiked", message);
+    }
+
     res.status(200).json(message);
   } catch (error) {
     console.error("Error in toggleLikeMessage:", error);

@@ -9,6 +9,6 @@ router.get("/:id", protectRoute, getMessages); //dynamic value
 
 router.post("/send/:id", protectRoute, sendMessage);
 
-router.put("/like/:messageId", protectRoute, toggleLikeMessage);
+router.patch("/like/:messageId", protectRoute, toggleLikeMessage);
 
 export default router;
