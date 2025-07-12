@@ -70,3 +70,31 @@ export const sendMessage = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+
+// Toggle like/unlike on a message
+export const toggleLikeMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const userId = req.user._id;
+
+    const message = await Message.findById(messageId);
+    if (!message) return res.status(404).json({ message: "Message not found" });
+
+    const alreadyLiked = message.likes.includes(userId);
+
+    if (alreadyLiked) {
+      message.likes = message.likes.filter((id) => id.toString() !== userId.toString());
+    } else {
+      message.likes.push(userId);
+    }
+
+    await message.save();
+
+    res.status(200).json(message);
+  } catch (error) {
+    console.error("Error in toggleLikeMessage:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

@@ -1,11 +1,12 @@
 import { useChatStore } from "../store/useChatStore";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { useAuthStore } from "../store/useAuthStore";
 import { formatMessageTime } from "../lib/utils";
+
 
 const ChatContainer = () => {
   const {
@@ -16,16 +17,35 @@ const ChatContainer = () => {
     subscribeToMessages,
     unsubscribeFromMessages,
   } = useChatStore();
-  const { authUser } = useAuthStore();
+
+  const { authUser, socket } = useAuthStore();
   const messageEndRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    getMessages(selectedUser._id);
+    if (!selectedUser) return;
 
+    getMessages(selectedUser._id);
     subscribeToMessages();
 
-    return () => unsubscribeFromMessages();
-  }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+    socket.emit("join", {
+      userId: authUser._id,
+      receiverId: selectedUser._id,
+    });
+
+    socket.on("typing", (data) => {
+      if (data.senderId === selectedUser._id) {
+        setIsTyping(true);
+        clearTimeout(window.typingTimeout);
+        window.typingTimeout = setTimeout(() => setIsTyping(false), 2000);
+      }
+    });
+
+    return () => {
+      unsubscribeFromMessages();
+      socket.off("typing");
+    };
+  }, [selectedUser?._id]);
 
   useEffect(() => {
     if (messageEndRef.current && messages) {
@@ -52,9 +72,8 @@ const ChatContainer = () => {
           <div
             key={message._id}
             className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`}
-            ref={messageEndRef}
           >
-            <div className=" chat-image avatar">
+            <div className="chat-image avatar">
               <div className="size-10 rounded-full border">
                 <img
                   src={
@@ -83,10 +102,20 @@ const ChatContainer = () => {
             </div>
           </div>
         ))}
+
+        {/* Typing Indicator */}
+        {isTyping && (
+          <div className="chat chat-start">
+            <div className="chat-bubble bg-base-300 animate-pulse">Typing...</div>
+          </div>
+        )}
+
+        <div ref={messageEndRef} />
       </div>
 
       <MessageInput />
     </div>
   );
 };
+
 export default ChatContainer;

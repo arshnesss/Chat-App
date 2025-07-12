@@ -10,6 +10,7 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
+  typingStatus: {}, // { userId: true/false }
 
   getUsers: async () => {
     set({ isUsersLoading: true });
@@ -46,26 +47,45 @@ export const useChatStore = create((set, get) => ({
   },
 
   subscribeToMessages: () => {
-    const { selectedUser } = get();
-    if (!selectedUser) return;
+  const { selectedUser } = get();
+  if (!selectedUser) return;
 
-    const socket = useAuthStore.getState().socket;
+  const socket = useAuthStore.getState().socket;
 
-    socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-      if (!isMessageSentFromSelectedUser) return;
+  // ✅ Listen for new incoming messages
+  socket.on("newMessage", (newMessage) => {
+    const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+    if (!isMessageSentFromSelectedUser) return;
 
-      set({
-        messages: [...get().messages, newMessage],
-      });
+    set({
+      messages: [...get().messages, newMessage],
     });
-  },
+  });
+
+  // ✅ Listen for typing indicator
+  socket.on("typing", ({ senderId }) => {
+    get().setTypingStatus(senderId, true);
+
+    // Auto clear after 2 seconds
+    setTimeout(() => {
+      get().setTypingStatus(senderId, false);
+    }, 2000);
+  });
+},
+
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
   },
 
+  setTypingStatus: (userId, isTyping) =>
+  set((state) => ({
+    typingStatus: {
+      ...state.typingStatus,
+      [userId]: isTyping,
+    },
+  })),
 
   setSelectedUser: (selectedUser) => set({ selectedUser }),
   
