@@ -77,65 +77,98 @@ const ChatContainer = () => {
       <ChatHeader />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message._id}
-            className={`chat ${
-              message.senderId === authUser._id ? "chat-end" : "chat-start"
-            }`}
-          >
-            <div className="chat-image avatar">
-              <div className="size-10 rounded-full border">
-                <img
-                  src={
-                    message.senderId === authUser._id
-                      ? authUser.profilePic || "/avatar.png"
-                      : selectedUser.profilePic || "/avatar.png"
-                  }
-                  alt="profile pic"
-                />
-              </div>
-            </div>
+        {messages.map((message) => {
+          const isOwnMessage = message.senderId === authUser._id;
+          const hasLiked = message.likes.includes(authUser._id);
 
-            <div className="chat-header mb-1">
-              <time className="text-xs opacity-50 ml-1">
-                {formatMessageTime(message.createdAt)}
-              </time>
-            </div>
-
-            <div className="chat-bubble flex flex-col group relative max-w-[80%]">
-              {message.image && (
-                <img
-                  src={message.image}
-                  alt="Attachment"
-                  className="sm:max-w-[200px] rounded-md mb-2"
-                />
-              )}
-              <div className="flex items-center justify-between">
-                {message.text && <p className="whitespace-pre-wrap break-words">{message.text}</p>}
-
-                <button
-                  onClick={() => handleLike(message._id)}
-                  className={`ml-2 transition-opacity ${
-                    message.likes.includes(authUser._id)
-                      ? "opacity-100 text-rose-500"
-                      : "opacity-0 group-hover:opacity-100 text-zinc-400"
-                  }`}
-                >
-                  <Heart
-                    size={16}
-                    fill={message.likes.includes(authUser._id) ? "red" : "none"}
-                    stroke={message.likes.includes(authUser._id) ? "red" : "currentColor"}
+          return (
+            <div
+              key={message._id}
+              className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} group`}
+            >
+              <div className="chat-image avatar">
+                <div className="size-10 rounded-full border">
+                  <img
+                    src={
+                      isOwnMessage
+                        ? authUser.profilePic || "/avatar.png"
+                        : selectedUser.profilePic || "/avatar.png"
+                    }
+                    alt="profile pic"
                   />
-                </button>
+                </div>
               </div>
 
-              {message.likes.length > 0 && (
-                <span className="text-xs mt-1 text-rose-500">{message.likes.length} like{message.likes.length > 1 ? "s" : ""}</span>
-              )}
+              <div className="chat-header mb-1">
+                <time className="text-xs opacity-50 ml-1">
+                  {formatMessageTime(message.createdAt)}
+                </time>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Left Heart for Your Own Message */}
+                {isOwnMessage && (
+                  <button
+                    onClick={() => handleLike(message._id)}
+                    className={`transition-opacity ${
+                      hasLiked
+                        ? "opacity-100 text-rose-500"
+                        : "opacity-0 group-hover:opacity-100 text-zinc-400"
+                    }`}
+                  >
+                    <Heart
+                      size={16}
+                      fill={hasLiked ? "red" : "none"}
+                      stroke={hasLiked ? "red" : "currentColor"}
+                    />
+                  </button>
+                )}
+
+                {/* Message bubble */}
+                <div className="chat-bubble flex flex-col max-w-[80%] relative">
+                  {message.image && (
+                    <img
+                      src={message.image}
+                      alt="Attachment"
+                      className="sm:max-w-[200px] rounded-md mb-2"
+                    />
+                  )}
+                  {message.text && (
+                    <p className="whitespace-pre-wrap break-words">{message.text}</p>
+                  )}
+
+                  {/* Tiny heart icon bottom-right (clean, non-overlapping) */}
+                  {message.likes.length > 0 && (
+                    <div className="absolute -bottom-3 -right-3">
+                      <Heart size={12} fill="red" stroke="red" className="drop-shadow-sm" />
+                    </div>
+                  )}
+                </div>
+
+
+
+                {/* Right Heart for Received Message */}
+                {!isOwnMessage && (
+                  <button
+                    onClick={() => handleLike(message._id)}
+                    className={`transition-opacity ${
+                      hasLiked
+                        ? "opacity-100 text-rose-500"
+                        : "opacity-0 group-hover:opacity-100 text-zinc-400"
+                    }`}
+                  >
+                    <Heart
+                      size={16}
+                      fill={hasLiked ? "red" : "none"}
+                      stroke={hasLiked ? "red" : "currentColor"}
+                    />
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+
 
         {/* Typing Indicator */}
         {isTyping && (

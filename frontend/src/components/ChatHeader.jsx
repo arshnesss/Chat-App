@@ -46,7 +46,7 @@ const ChatHeader = () => {
         <div className="flex items-center gap-2">
           {!theyBlocked && (
             <button
-              className="btn btn-xs btn-outline"
+              className="btn btn-xs btn-primary"
               onClick={handleBlockToggle}
             >
               {isBlocked ? "Unblock" : "Block"}
@@ -57,6 +57,7 @@ const ChatHeader = () => {
             <X />
           </button>
         </div>
+
       </div>
     </div>
   );
