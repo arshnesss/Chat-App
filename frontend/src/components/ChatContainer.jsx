@@ -52,15 +52,20 @@ const ChatContainer = () => {
     };
   }, [selectedUser?._id]);
 
+  const prevMessageCount = useRef(0);
+
   useEffect(() => {
-    if (messageEndRef.current && messages) {
-      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > prevMessageCount.current) {
+      // Only scroll if a new message is added
+      messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
+    prevMessageCount.current = messages.length;
   }, [messages]);
 
+
   const handleLike = (messageId) => {
-  toggleLikeMessage(messageId); // No need for try/catch here
-};
+    toggleLikeMessage(messageId); // No need for try/catch here
+  };
 
   if (isMessagesLoading) {
     return (
@@ -105,8 +110,7 @@ const ChatContainer = () => {
                 </time>
               </div>
 
-              <div className="flex items-center gap-2">
-                {/* Left Heart for Your Own Message */}
+              <div className="flex items-end gap-2">
                 {isOwnMessage && (
                   <button
                     onClick={() => handleLike(message._id)}
@@ -124,20 +128,22 @@ const ChatContainer = () => {
                   </button>
                 )}
 
-                {/* Message bubble */}
-                <div className="chat-bubble flex flex-col max-w-[80%] relative">
+                <div
+                  className={`chat-bubble relative max-w-[80%] px-4 py-2 rounded-2xl shadow-md
+                    ${isOwnMessage ? "bg-primary text-primary-content" : "bg-base-300 text-base-content"}
+                  `}
+                >
                   {message.image && (
                     <img
                       src={message.image}
                       alt="Attachment"
-                      className="sm:max-w-[200px] rounded-md mb-2"
+                      className="sm:max-w-[200px] rounded-lg mb-2"
                     />
                   )}
                   {message.text && (
                     <p className="whitespace-pre-wrap break-words">{message.text}</p>
                   )}
 
-                  {/* Tiny heart icon bottom-right (clean, non-overlapping) */}
                   {message.likes.length > 0 && (
                     <div className="absolute -bottom-3 -right-3">
                       <Heart size={12} fill="red" stroke="red" className="drop-shadow-sm" />
@@ -145,9 +151,6 @@ const ChatContainer = () => {
                   )}
                 </div>
 
-
-
-                {/* Right Heart for Received Message */}
                 {!isOwnMessage && (
                   <button
                     onClick={() => handleLike(message._id)}
