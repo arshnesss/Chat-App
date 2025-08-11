@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.7.7",
     "chat-app": "file:..",
     "lucide-react": "^0.459.0",
