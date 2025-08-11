@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
+import path from "path";
+
 import { connectDB } from './lib/db.js'; 
 
 import authRoutes from './routes/auth.route.js';
@@ -12,6 +14,7 @@ import { app, server } from "./lib/socket.js";
 dotenv.config(); // Load environment variables from .env file
 
 const PORT=process.env.PORT
+const __dirname = path.resolve(); // Get the current directory name
 
 app.use(express.json()); // Middleware to parse JSON requests or allow us to retrive json data from the request body
 app.use(cookieParser()); // Middleware to parse cookies from the request
@@ -22,6 +25,14 @@ app.use(cors({
 
 app.use("/api/auth", authRoutes)
 app.use("/api/messages", messageRoutes);  // Use the message routes for handling message-related requests
+
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../frontend/build")));
+  
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(__dirname, "../frontend", "build", "index.html"));
+    });
+}
 
 server.listen(PORT, () => {
     console.log('Server is running on PORT:'+ PORT);
